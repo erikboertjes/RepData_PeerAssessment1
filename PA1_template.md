@@ -1,16 +1,12 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
 Unzip and read the data from the file _activity.zip_.
 
-```{r, echo=TRUE}
+
+```r
 activity.data <- read.table(unz("activity.zip","activity.csv"), header = TRUE, sep = ",", colClasses = c("numeric","Date","integer"))
 ```
 
@@ -18,8 +14,25 @@ activity.data <- read.table(unz("activity.zip","activity.csv"), header = TRUE, s
 
 The following histogram shows distribution of the total number of steps taken each day. Missing values are ignored (complying with the instructions for this assignment).
 
-```{r, echo=TRUE}
+
+```r
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+## 
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+## 
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(ggplot2)
 # Aggregate the number of steps, summing them per day, ignoring NA values
 group.by.day <- group_by(activity.data, date)
@@ -32,17 +45,21 @@ g + geom_histogram() +
        y = "Number of days")
 ```
 
-```{r, echo=TRUE}
+![](PA1_template_files/figure-html/unnamed-chunk-2-1.png) 
+
+
+```r
 total.steps.mean <- round(mean(activity.per.day$total.steps), digits = 2)
 total.steps.median <- median(activity.per.day$total.steps)
 ```
-The mean total number of steps is **`r sprintf("%.2f",total.steps.mean)`**
+The mean total number of steps is **9354.23**
 
-The median total number of steps is **`r sprintf("%.2f",total.steps.median)`**
+The median total number of steps is **10395.00**
 
 ## What is the average daily activity pattern?
 
-```{r, echo=TRUE}
+
+```r
 library(dplyr)
 library(ggplot2)
 # aggregate the activity data per time interval, taking average number of steps per interval over all days
@@ -56,25 +73,30 @@ g + geom_line() +
        y = "average number of steps")
 ```
 
-```{r, echo=TRUE}
+![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+
+
+```r
 interval.with.max.steps <- activity.per.interval[which.max(activity.per.interval$average.steps),]
 ```
 
-The 5-minute interval with the highest average number of steps is **`r interval.with.max.steps$interval`**
+The 5-minute interval with the highest average number of steps is **835**
 
-It has **`r interval.with.max.steps$average.steps`** steps on average
+It has **206.1698113** steps on average
 
 ## Imputing missing values
 
-```{r, echo=TRUE}
+
+```r
 number.of.missing.values <- sum(!complete.cases(activity.data))
 ```
 
-The number of missing values (i.e. intervals for which the number of steps is unknown) equals **`r number.of.missing.values`**
+The number of missing values (i.e. intervals for which the number of steps is unknown) equals **2304**
 
 For filling in the missing values, we take the following strategy: for each interval with a missing value we take the mean value for that interval over all days.
 
-```{r, echo=TRUE}
+
+```r
 # first, copy the original data
 activity.data.imputed <- activity.data
 # replace NA values with the mean value of the interval
@@ -84,7 +106,8 @@ activity.data.imputed[indices.missing.values,"steps"] <- activity.per.interval$a
 
 Like before, we aggregate and sum the steps per day
 
-```{r, echo=TRUE}
+
+```r
 library(dplyr)
 library(ggplot2)
 # Aggregate the number of steps, summing them per day, ignoring NA values
@@ -98,21 +121,25 @@ g + geom_histogram() +
        y = "Number of days")
 ```
 
-```{r, echo=TRUE}
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
+
+```r
 total.steps.imputed.mean <- mean(activity.per.day.imputed$total.steps)
 total.steps.imputed.median <- median(activity.per.day.imputed$total.steps)
 ```
 
-The mean total number of steps (with missing values imputed) is **`r sprintf("%.2f", total.steps.imputed.mean)`**
+The mean total number of steps (with missing values imputed) is **10766.19**
 
-The median total number of steps (with missing values imputed) is **`r sprintf("%.2f", total.steps.imputed.median)`**
+The median total number of steps (with missing values imputed) is **10766.19**
 
 These values are higher than those of the first part of the assignment (without imputing missing values). The effect of imputing missing values is that the mean and median are equal.
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
-```{r, echo=TRUE}
+
+```r
 # add factor variable day.type that indicates whether date is in a weekend or is a weekday
 activity.data.imputed$day.type <- ifelse(weekdays(activity.data.imputed$date) %in% c("Saturday","Sunday"),"weekend","weekday")
 # calculate average number of steps per time interval over all days
@@ -125,3 +152,5 @@ g + geom_line() + facet_grid(day.type ~ .) +
        x = "Interval",
        y = "Number of steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
